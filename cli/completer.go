@@ -180,6 +180,13 @@ func doInternal(line []rune, pos int, lineLen int, argName []rune) (newLine [][]
 	return
 }
 
+func overrideArgName(noun string, argName string) string {
+	if noun == "systemvm" && argName == "virtualmachineid" {
+		return "systemvm"
+	}
+	return argName
+}
+
 func findAutocompleteAPI(arg *config.APIArg, apiFound *config.API, apiMap map[string][]*config.API) *config.API {
 	if arg.Type == "map" {
 		return nil
@@ -203,6 +210,7 @@ func findAutocompleteAPI(arg *config.APIArg, apiFound *config.API, apiMap map[st
 	} else {
 		// Heuristic: autocomplete for the arg for which a list<Arg without id/ids>s API exists
 		// For example, for zoneid arg, listZones API exists
+		argName := overrideArgName(apiFound.Noun, argName)
 		cutIdx := len(argName)
 		if strings.HasSuffix(argName, "id") {
 			cutIdx -= 2
