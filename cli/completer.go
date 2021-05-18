@@ -188,19 +188,22 @@ func findAutocompleteAPI(arg *config.APIArg, apiFound *config.API, apiMap map[st
 	var autocompleteAPI *config.API
 	argName := strings.Replace(arg.Name, "=", "", -1)
 	relatedNoun := argName
-	if argName == "id" || argName == "ids" {
+	switch {
+	case argName == "id" || argName == "ids":
 		// Heuristic: user is trying to autocomplete for id/ids arg for a list API
 		relatedNoun = apiFound.Noun
 		if apiFound.Verb != "list" {
 			relatedNoun += "s"
 		}
-	} else if argName == "account" {
+	case argName == "account":
 		// Heuristic: user is trying to autocomplete for accounts
 		relatedNoun = "accounts"
-	} else if argName == "ipaddressid" {
+	case argName == "ipaddressid":
 		// Heuristic: user is trying to autocomplete for ip addresses
 		relatedNoun = "publicipaddresses"
-	} else {
+	case argName == "storageid":
+		relatedNoun = "storagepools"
+	default:
 		// Heuristic: autocomplete for the arg for which a list<Arg without id/ids>s API exists
 		// For example, for zoneid arg, listZones API exists
 		cutIdx := len(argName)
