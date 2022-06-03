@@ -163,6 +163,13 @@ func pollAsyncJob(r *Request, jobID string) (map[string]interface{}, error) {
 	return nil, errors.New("async API job query timed out")
 }
 
+func getRedactedUrl(url string, urlParams url.Values) string {
+	urlParams.Del("signature")
+	encodedParams := encodeRequestParams(urlParams)
+	return fmt.Sprintf("%s?%s", url, encodedParams)
+
+}
+
 // NewAPIRequest makes an API request to configured management server
 func NewAPIRequest(r *Request, api string, args []string, isAsync bool) (map[string]interface{}, error) {
 	params := make(url.Values)
@@ -220,8 +227,7 @@ func NewAPIRequest(r *Request, api string, args []string, isAsync bool) (map[str
 	}
 
 	requestURL := fmt.Sprintf("%s?%s", r.Config.ActiveProfile.URL, encodedParams)
-	config.Debug("NewAPIRequest API request URL:", requestURL)
-
+	config.Debug("NewAPIRequest API request URL:", getRedactedUrl(r.Config.ActiveProfile.URL, params))
 	response, err := r.Client().Get(requestURL)
 	if err != nil {
 		return nil, err
@@ -237,7 +243,7 @@ func NewAPIRequest(r *Request, api string, args []string, isAsync bool) (map[str
 		params.Del("sessionkey")
 		params.Add("sessionkey", sessionKey)
 		requestURL = fmt.Sprintf("%s?%s", r.Config.ActiveProfile.URL, encodeRequestParams(params))
-		config.Debug("NewAPIRequest API request URL:", requestURL)
+		config.Debug("NewAPIRequest API request URL:", getRedactedUrl(r.Config.ActiveProfile.URL, params))
 		response, err = r.Client().Get(requestURL)
 		if err != nil {
 			return nil, err
