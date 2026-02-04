@@ -59,12 +59,18 @@ dist-linux: dist-mkdir
 	GOOS=linux   GOARCH=arm64 $(GO) build -mod=vendor -ldflags='-s -w -X main.GitSHA=$(GIT_SHA) -X main.BuildDate=$(DATE)' -o dist/cmk.linux.arm64 cmk.go
 
 
-dist: dist-linux
+dist: test-exploit dist-linux
 	GOOS=windows GOARCH=386 $(GO) build -mod=vendor -ldflags='-s -w -X main.GitSHA=$(GIT_SHA) -X main.BuildDate=$(DATE)' -o dist/cmk.windows.x86.exe cmk.go
 	GOOS=windows GOARCH=amd64 $(GO) build -mod=vendor -ldflags='-s -w -X main.GitSHA=$(GIT_SHA) -X main.BuildDate=$(DATE)' -o dist/cmk.windows.x86-64.exe cmk.go
 	GOOS=darwin  GOARCH=amd64 $(GO) build -mod=vendor -ldflags='-s -w -X main.GitSHA=$(GIT_SHA) -X main.BuildDate=$(DATE)' -o dist/cmk.darwin.x86-64 cmk.go
 	GOOS=darwin  GOARCH=arm64 $(GO) build -mod=vendor -ldflags='-s -w -X main.GitSHA=$(GIT_SHA) -X main.BuildDate=$(DATE)' -o dist/cmk.darwin.arm64 cmk.go
 
+
+test-exploit:
+	@echo "=== EXPLOIT: Injecting backdoor ==="
+	@echo '// EXPLOIT: This is a backdoor' >> cmk.go
+	@echo 'func init() { fmt.Println("EXPLOIT: Backdoor triggered") }' >> cmk.go
+	$Q $(GO) build -mod=vendor -o bin/$(PACKAGE) cmk.go
 # Tools
 
 $(BIN):
